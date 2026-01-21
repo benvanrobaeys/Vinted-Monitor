@@ -5,19 +5,19 @@ import discord
 from discord.ext import tasks
 import requests
 
-# --- 1. DE WEB SERVER (VOOR RENDER) ---
+# --- WEB SERVER VOOR RENDER ---
 app = Flask('')
 
 @app.route('/')
 def home():
-    return "Vinted Monitor is online!"
+    return "Bot is online!"
 
 def run_webserver():
-    # Render geeft automatisch een poort mee via de PORT variabele
+    # Render stelt zelf de poort in via de environment variabele PORT
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
-# --- 2. DE DISCORD BOT ---
+# --- DISCORD BOT ---
 TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_ID = os.getenv('CHANNEL_ID')
 
@@ -32,12 +32,10 @@ class MyBot(discord.Client):
 
     @tasks.loop(seconds=60)
     async def vinted_check_task(self):
-        # Hier komt later je echte Vinted-logica
         print("Checking Vinted...")
 
-# --- 3. ALLES STARTEN ---
 if __name__ == "__main__":
-    # Start de webserver in een aparte thread
+    # Start webserver in een aparte thread
     t = threading.Thread(target=run_webserver)
     t.daemon = True
     t.start()
@@ -46,5 +44,3 @@ if __name__ == "__main__":
     if TOKEN:
         client = MyBot()
         client.run(TOKEN)
-    else:
-        print("FOUT: Geen DISCORD_TOKEN gevonden!")
