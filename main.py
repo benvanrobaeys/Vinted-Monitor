@@ -1,49 +1,50 @@
-import discord
 import os
-import requests
+import threading
+from flask import Flask
+import discord
 from discord.ext import tasks
-from bs4 import BeautifulSoup
+import requests
 
-# Variabelen ophalen
+# --- 1. DE WEB SERVER (VOOR RENDER) ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Vinted Monitor is online!"
+
+def run_webserver():
+    # Render geeft automatisch een poort mee via de PORT variabele
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
+# --- 2. DE DISCORD BOT ---
 TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_ID = os.getenv('CHANNEL_ID')
-VINTED_URL = os.getenv('VINTED_URL')
-PROXY_URL = os.getenv('PROXY_URL') # Mag leeg blijven
-REFRESH_RATE = int(os.getenv('REFRESH_RATE', 60))
 
-class VintedBot(discord.Client):
+class MyBot(discord.Client):
     def __init__(self):
         intents = discord.Intents.default()
         super().__init__(intents=intents)
-        self.last_item_id = None
 
     async def on_ready(self):
-        print(f'{self.user.name} is gestart!')
-        self.check_vinted.start()
+        print(f'Ingelogd als {self.user.name}')
+        self.vinted_check_task.start()
 
-    @tasks.loop(seconds=REFRESH_RATE)
-    async def check_vinted(self):
-        if not VINTED_URL or not CHANNEL_ID:
-            print("Fout: VINTED_URL of CHANNEL_ID niet ingesteld!")
-            return
+    @tasks.loop(seconds=60)
+    async def vinted_check_task(self):
+        # Hier komt later je echte Vinted-logica
+        print("Checking Vinted...")
 
-        channel = self.get_channel(int(CHANNEL_ID))
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"}
-        
-        # Alleen proxy gebruiken als de variabele is ingevuld
-        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
-
-        try:
-            response = requests.get(VINTED_URL, headers=headers, proxies=proxies, timeout=10)
-            
-            if response.status_code == 200:
-                print("Check gelukt: Geen blokkade.")
-                # Hier komt straks de BeautifulSoup logica
-            else:
-                print(f"Blokkade of fout! Code: {response.status_code}")
-                
-        except Exception as e:
-            print(f"Verbindingsfout: {e}")
-
-client = VintedBot()
-client.run(TOKEN)
+# --- 3. ALLES STARTEN ---
+if __name__ == "__main__":
+    # Start de webserver in een aparte thread
+    t = threading.Thread(target=run_webserver)
+    t.daemon = True
+    t.start()
+    
+    # Start de Discord bot
+    if TOKEN:
+        client = MyBot()
+        client.run(TOKEN)
+    else:
+        print("FOUT: Geen DISCORD_TOKEN gevonden!")
