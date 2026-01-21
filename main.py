@@ -9,8 +9,8 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 WEBHOOK_URL = "https://discord.com/api/webhooks/1463458458996179067/vAfAKHxd45T8rNZjEQ-EEPEi3CVgxCU6JxEEiVYB7v365mvxiWbdOxcMmstsIbXVBw9l" 
 
 # De API URL gebaseerd op jouw Ralph Lauren filters:
-# Sorteren op: Nieuwste eerst, Prijs: max 20, Merk: Ralph Lauren, Maten: S, M, L
-MONITOR_URL = "https://www.vinted.nl/api/v2/catalog/items?catalog_ids=79&size_ids=2,3,4&brand_ids=88&status_ids=1,2&price_to=20&currency=EUR&order=newest_first"
+# Sorteren op: Nieuwste eerst, Merk: Ralph Lauren, Maten: S, M, L
+MONITOR_URL = "https://www.vinted.nl/catalog?catalog[]=79&search_by_image_uuid=&page=1&search_id=30506752509&time=1768992083&size_ids[]=207&size_ids[]=208&size_ids[]=209&brand_ids[]=88&status_ids[]=1&status_ids[]=2&currency=EUR&order=newest_first"
 # ================================================
 
 app = Flask('')
